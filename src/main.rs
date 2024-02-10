@@ -2,8 +2,9 @@ use glam::{Quat, Vec2};
 use nalgebra::{point, vector, Isometry2, Point2, Vector2};
 use rapier2d::prelude::*;
 use ggez::event;
-use ggez::graphics::{self, Canvas, Color, DrawParam, Image};
+use ggez::graphics::{self, Canvas, Color, DrawParam, Image, Rect};
 use ggez::{Context, GameResult};
+use ggez::mint::Point2 as P2;
 
 struct MainState {
     ball_image: Image,
@@ -27,7 +28,8 @@ impl event::EventHandler for MainState {
         let mut canvas = Canvas::from_frame(ctx, Color::BLACK);
 
         // Draw the image onto the window
-        canvas.draw(&self.ball_image, DrawParam::default());
+        canvas.draw(&graphics::Quad, DrawParam::new().dest_rect(Rect::new(0.0, 0.0, 50.0, 50.0)));
+        canvas.draw(&self.ball_image, DrawParam::default().dest(P2 { x: 9.0, y: 9.0}));
 
         canvas.finish(ctx)?;
         Ok(())
