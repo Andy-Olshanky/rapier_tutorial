@@ -2,7 +2,9 @@ use ggez::event;
 use ggez::graphics::{self, Canvas, Color, DrawParam, Drawable, Image, Rect};
 use ggez::mint::Point2 as P2;
 use ggez::{Context, GameResult};
+#[allow(unused_imports)]
 use glam::{Quat, Vec2};
+#[allow(unused_imports)]
 use nalgebra::{point, vector, Isometry2, Point2, Vector2};
 use rapier2d::prelude::*;
 
