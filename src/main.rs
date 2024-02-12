@@ -1,5 +1,5 @@
 use ggez::event;
-use ggez::graphics::{self, Canvas, Color, DrawParam, Drawable, Image, Rect};
+use ggez::graphics::{Canvas, Color, DrawParam, Drawable, Image, Rect};
 use ggez::mint::Point2 as P2;
 use ggez::{Context, GameResult};
 #[allow(unused_imports)]
@@ -17,21 +17,24 @@ struct MainState {
     ball_image2: Image,
     frame_width2: f32,
     frame_height2: f32,
+    floor: Image,
 }
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
         // 1 row x 6 column sprite sheet
-        let ball_image1 = Image::from_path(ctx, "\\ball_sheet.png")?;
+        let ball_image1 = Image::from_path(ctx, "/ball_sheet.png")?;
         let dimensions1 = ball_image1.dimensions(ctx).unwrap();
         let frame_size = (32.0, 32.0);
         let frame_count = 6;
         let frame_width1 = frame_size.0 / dimensions1.w;
 
-        let ball_image2 = Image::from_path(ctx, "\\ball_sheet2.png")?;
+        let ball_image2 = Image::from_path(ctx, "/ball_sheet2.png")?;
         let dimensions2 = ball_image2.dimensions(ctx).unwrap();
         let frame_height2 = frame_size.1 / dimensions2.h;
         let frame_width2 = frame_size.0 / dimensions2.w;
+
+        let floor = Image::from_path(ctx, "/floor.png")?;
 
         Ok(MainState {
             ball_image1,
@@ -42,13 +45,14 @@ impl MainState {
             ball_image2,
             frame_width2,
             frame_height2,
+            floor,
         })
     }
 }
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        while ctx.time.check_update_time(1) {
+        while ctx.time.check_update_time(5) {
             self.frame_index += 1;
             self.frame_index %= self.frame_count;
         }
@@ -72,27 +76,26 @@ impl event::EventHandler for MainState {
             self.frame_height2,
         );
 
-        // Draw the image onto the window
-        canvas.draw(
-            &graphics::Quad,
-            DrawParam::new().dest_rect(Rect::new(0.0, 0.0, 50.0, 50.0)),
-        );
         canvas.draw(
             &self.ball_image1,
             DrawParam::new().src(ball_rect1).dest(P2 { x: 9.0, y: 9.0 }),
         );
 
-        // Draw the image onto the window
-        canvas.draw(
-            &graphics::Quad,
-            DrawParam::new().dest_rect(Rect::new(100.0, 100.0, 50.0, 50.0)),
-        );
         canvas.draw(
             &self.ball_image2,
             DrawParam::new()
                 .src(ball_rect2)
                 .dest(P2 { x: 109.0, y: 109.0 }),
         );
+
+        let repitions = 800 / self.floor.width();
+
+        for i in 0..repitions {
+            canvas.draw(
+                &self.floor,
+                DrawParam::new().dest([(i * self.floor.width()) as f32, 600.0 - self.floor.height() as f32]),
+            );
+        }
 
         canvas.finish(ctx)?;
         Ok(())
