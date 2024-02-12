@@ -13,7 +13,7 @@ struct MainState {
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
         // Load the Aseprite image file
-        let ball_image = Image::from_path(ctx, "\\ball.png")?; // Adjust the path as needed
+        let ball_image = Image::from_path(ctx, "\\ball_sheet.png")?; // Adjust the path as needed
 
         Ok(MainState { ball_image })
     }
