@@ -20,7 +20,10 @@ impl MainState {
 }
 
 impl event::EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
+        while ctx.time.check_update_time(10) {
+
+        }
         Ok(())
     }
 
