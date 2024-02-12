@@ -9,27 +9,39 @@ use nalgebra::{point, vector, Isometry2, Point2, Vector2};
 use rapier2d::prelude::*;
 
 struct MainState {
-    ball_image: Image,
+    ball_image1: Image,
     frame_index: usize,
-    frame_width: f32,
-    frame_height: f32,
+    frame_width1: f32,
+    frame_height1: f32,
     frame_count: usize,
+    ball_image2: Image,
+    frame_width2: f32,
+    frame_height2: f32,
 }
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
-        // Load the Aseprite image file
-        let ball_image = Image::from_path(ctx, "\\ball_sheet.png")?; // Adjust the path as needed
-        let dimensions = ball_image.dimensions(ctx).unwrap();
-        let frame_count = 5;
-        let frame_width = dimensions.w / frame_count as f32;
+        // 1 row x 6 column sprite sheet
+        let ball_image1 = Image::from_path(ctx, "\\ball_sheet.png")?;
+        let dimensions1 = ball_image1.dimensions(ctx).unwrap();
+        let frame_size = (32.0, 32.0);
+        let frame_count = 6;
+        let frame_width1 = frame_size.0 / dimensions1.w;
+
+        let ball_image2 = Image::from_path(ctx, "\\ball_sheet2.png")?;
+        let dimensions2 = ball_image2.dimensions(ctx).unwrap();
+        let frame_height2 = frame_size.1 / dimensions2.h;
+        let frame_width2 = frame_size.0 / dimensions2.w;
 
         Ok(MainState {
-            ball_image,
+            ball_image1,
             frame_index: 0,
-            frame_width,
-            frame_height: dimensions.h,
+            frame_width1,
+            frame_height1: dimensions1.h / frame_size.1,
             frame_count,
+            ball_image2,
+            frame_width2,
+            frame_height2,
         })
     }
 }
@@ -46,11 +58,18 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas = Canvas::from_frame(ctx, Color::BLACK);
 
-        let ball_rect = Rect::new(
-            self.frame_index as f32 * self.frame_width,
+        let ball_rect1 = Rect::new(
+            self.frame_index as f32 * self.frame_width1,
             0.0,
-            self.frame_width,
-            self.frame_height,
+            self.frame_width1,
+            self.frame_height1,
+        );
+
+        let ball_rect2 = Rect::new(
+            (self.frame_index % 3) as f32 * self.frame_width2,
+            (self.frame_index / (self.frame_count / 2)) as f32 / 2.0,
+            self.frame_width2,
+            self.frame_height2,
         );
 
         // Draw the image onto the window
@@ -59,10 +78,20 @@ impl event::EventHandler for MainState {
             DrawParam::new().dest_rect(Rect::new(0.0, 0.0, 50.0, 50.0)),
         );
         canvas.draw(
-            &self.ball_image,
+            &self.ball_image1,
+            DrawParam::new().src(ball_rect1).dest(P2 { x: 9.0, y: 9.0 }),
+        );
+
+        // Draw the image onto the window
+        canvas.draw(
+            &graphics::Quad,
+            DrawParam::new().dest_rect(Rect::new(100.0, 100.0, 50.0, 50.0)),
+        );
+        canvas.draw(
+            &self.ball_image2,
             DrawParam::new()
-                .src(ball_rect)
-                .dest(P2 { x: 9.0, y: 9.0 }),
+                .src(ball_rect2)
+                .dest(P2 { x: 109.0, y: 109.0 }),
         );
 
         canvas.finish(ctx)?;
