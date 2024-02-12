@@ -1,28 +1,42 @@
+use ggez::event;
+use ggez::graphics::{self, Canvas, Color, DrawParam, Drawable, Image, Rect};
+use ggez::mint::Point2 as P2;
+use ggez::{Context, GameResult};
 use glam::{Quat, Vec2};
 use nalgebra::{point, vector, Isometry2, Point2, Vector2};
 use rapier2d::prelude::*;
-use ggez::event;
-use ggez::graphics::{self, Canvas, Color, DrawParam, Image, Rect};
-use ggez::{Context, GameResult};
-use ggez::mint::Point2 as P2;
 
 struct MainState {
     ball_image: Image,
+    frame_index: usize,
+    frame_width: f32,
+    frame_height: f32,
+    frame_count: usize,
 }
 
 impl MainState {
     fn new(ctx: &mut Context) -> GameResult<MainState> {
         // Load the Aseprite image file
         let ball_image = Image::from_path(ctx, "\\ball_sheet.png")?; // Adjust the path as needed
+        let dimensions = ball_image.dimensions(ctx).unwrap();
+        let frame_count = 5;
+        let frame_width = dimensions.w / frame_count as f32;
 
-        Ok(MainState { ball_image })
+        Ok(MainState {
+            ball_image,
+            frame_index: 0,
+            frame_width,
+            frame_height: dimensions.h,
+            frame_count,
+        })
     }
 }
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        while ctx.time.check_update_time(10) {
-
+        while ctx.time.check_update_time(1) {
+            self.frame_index += 1;
+            self.frame_index %= self.frame_count;
         }
         Ok(())
     }
@@ -30,9 +44,24 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         let mut canvas = Canvas::from_frame(ctx, Color::BLACK);
 
+        let ball_rect = Rect::new(
+            self.frame_index as f32 * self.frame_width,
+            0.0,
+            self.frame_width,
+            self.frame_height,
+        );
+
         // Draw the image onto the window
-        canvas.draw(&graphics::Quad, DrawParam::new().dest_rect(Rect::new(0.0, 0.0, 50.0, 50.0)));
-        canvas.draw(&self.ball_image, DrawParam::default().dest(P2 { x: 9.0, y: 9.0}));
+        canvas.draw(
+            &graphics::Quad,
+            DrawParam::new().dest_rect(Rect::new(0.0, 0.0, 50.0, 50.0)),
+        );
+        canvas.draw(
+            &self.ball_image,
+            DrawParam::new()
+                .src(ball_rect)
+                .dest(P2 { x: 9.0, y: 9.0 }),
+        );
 
         canvas.finish(ctx)?;
         Ok(())
@@ -40,8 +69,7 @@ impl event::EventHandler for MainState {
 }
 
 pub fn main() -> GameResult {
-    let (mut ctx, event_loop) = ggez::ContextBuilder::new("my_game", "My Name")
-        .build()?;
+    let (mut ctx, event_loop) = ggez::ContextBuilder::new("my_game", "My Name").build()?;
     let state = MainState::new(&mut ctx)?;
     event::run(ctx, event_loop, state);
     // let _v = Vector2::new(1.0, 2.0);
@@ -188,7 +216,7 @@ pub fn main() -> GameResult {
     // let filter = QueryFilter::default();
 
     // if let Some((handle, hit)) = query_pipeline.cast_shape(
-    //     &rigid_body_set, 
+    //     &rigid_body_set,
     //     &collider_set,
     //     &shape_pos,
     //     &shape_vel,
